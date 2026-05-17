@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🏏 Captain Cool — IPL Multi-Agent Match Strategist
 
 > **Built on Google Gemini · APL GDG Pune Hackathon 2025**
