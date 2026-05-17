@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Captain Cool — IPL Multi-Agent Strategist</title>
+  <meta name="description" content="AI-powered IPL captain using 4 Gemini agents to debate and decide live match tactics." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sora: ['Sora', 'sans-serif'] },
+          colors: {
+            obsidian: '#131313',
+            surface: '#1c1c1c',
+            surface2: '#242424',
+            border: '#2e2e2e',
+            orange: { DEFAULT: '#ff8a00', light: '#ffad4d', dark: '#cc6e00' },
+            gold: '#ffd700',
+            teal: '#00d4aa',
+            purple: '#8b5cf6',
+          },
+          backgroundImage: {
+            'orange-grad': 'linear-gradient(135deg, #ff8a00, #ffad4d)',
+            'dark-grad': 'linear-gradient(180deg, #1c1c1c, #131313)',
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body class="font-sora bg-obsidian text-white min-h-screen overflow-x-hidden">
+
+  <!-- Ambient glows -->
+  <div class="fixed inset-0 pointer-events-none z-0">
+    <div class="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-orange/10 blur-[120px]"></div>
+    <div class="absolute -bottom-32 -right-32 w-80 h-80 rounded-full bg-teal/10 blur-[100px]"></div>
+  </div>
+
+  <!-- ── SCREEN ROUTER ── -->
+  <div id="app" class="relative z-10">
+
+    <!-- ════ SCREEN 1: COMMAND CENTER ════ -->
+    <div id="screen-command" class="screen-active">
+
+      <!-- Header -->
+      <header class="sticky top-0 z-50 bg-obsidian/90 backdrop-blur-xl border-b border-border px-4 h-14 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">🏏</span>
+          <div>
+            <p class="text-sm font-bold leading-none tracking-wide">Captain Cool</p>
+            <p class="text-[10px] text-white/40 uppercase tracking-widest">IPL Strategist</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface border border-border text-xs text-white/50">
+          <span class="w-1.5 h-1.5 rounded-full bg-teal animate-pulse"></span>
+          Gemini 2.5 Flash
+        </div>
+      </header>
+
+      <!-- Hero -->
+      <section class="px-4 pt-8 pb-6 text-center">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange/10 border border-orange/30 text-orange text-xs font-semibold uppercase tracking-widest mb-4">
+          Multi-Agent AI Debate
+        </div>
+        <h1 class="text-3xl font-extrabold leading-tight mb-2">
+          The Virtual<br/>
+          <span class="bg-orange-grad bg-clip-text text-transparent">Captain</span> in Your Dugout
+        </h1>
+        <p class="text-sm text-white/50 leading-relaxed">4 Gemini agents debate the next tactical call — live data, real back-and-forth.</p>
+        <!-- Agent pills -->
+        <div class="flex flex-wrap items-center justify-center gap-2 mt-4 text-xs">
+          <span class="px-2.5 py-1 rounded-full bg-teal/10 border border-teal/30 text-teal">📊 Stats Analyst</span>
+          <span class="text-white/30">→</span>
+          <span class="px-2.5 py-1 rounded-full bg-orange/10 border border-orange/30 text-orange-light">🧠 Strategist</span>
+          <span class="text-white/30">↔</span>
+          <span class="px-2.5 py-1 rounded-full bg-purple/10 border border-purple/30 text-purple-300">😈 Devil's Advocate</span>
+          <span class="text-white/30">→</span>
+          <span class="px-2.5 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/30 text-yellow-400">🎙️ Commentator</span>
+        </div>
+      </section>
+
+      <!-- Form Card -->
+      <section class="px-4 pb-8">
+        <div class="bg-surface border border-border rounded-2xl overflow-hidden">
+
+          <!-- Captain Style -->
+          <div class="p-4 border-b border-border">
+            <p class="text-xs font-semibold uppercase tracking-widest text-white/40 mb-3">Captain Style</p>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" class="captain-btn active-captain" data-style="Dhoni" id="btn-dhoni">
+                <span class="text-xl">🧊</span>
+                <span class="text-sm font-bold">Dhoni</span>
+                <span class="text-[10px] text-white/40">Calculated</span>
+              </button>
+              <button type="button" class="captain-btn" data-style="Rohit" id="btn-rohit">
+                <span class="text-xl">⚡</span>
+                <span class="text-sm font-bold">Rohit</span>
+                <span class="text-[10px] text-white/40">Aggressive</span>
+              </button>
+              <button type="button" class="captain-btn" data-style="Hardik" id="btn-hardik">
+                <span class="text-xl">🔥</span>
+                <span class="text-sm font-bold">Hardik</span>
+                <span class="text-[10px] text-white/40">Instinctive</span>
+              </button>
+            </div>
+            <input type="hidden" id="captain_style" value="Dhoni" />
+          </div>
+
+          <form id="match-form" class="p-4 space-y-4">
+
+            <!-- Innings/Over/Ball -->
+            <div>
+              <p class="form-section-label">Match Situation</p>
+              <div class="grid grid-cols-3 gap-2">
+                <div>
+                  <label class="form-label">Innings</label>
+                  <select class="form-ctrl" id="innings" name="innings">
+                    <option value="1">1st</option>
+                    <option value="2" selected>2nd</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label">Over</label>
+                  <input type="number" class="form-ctrl" id="over" value="16" min="0" max="19" />
+                </div>
+                <div>
+                  <label class="form-label">Ball</label>
+                  <input type="number" class="form-ctrl" id="ball" value="0" min="0" max="5" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Score -->
+            <div>
+              <p class="form-section-label">Scoreboard</p>
+              <div class="grid grid-cols-3 gap-2">
+                <div>
+                  <label class="form-label">Runs</label>
+                  <input type="number" class="form-ctrl" id="current_score" value="145" />
+                </div>
+                <div>
+                  <label class="form-label">Wickets</label>
+                  <input type="number" class="form-ctrl" id="wickets" value="3" min="0" max="10" />
+                </div>
+                <div>
+                  <label class="form-label">Target</label>
+                  <input type="number" class="form-ctrl" id="target" value="187" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Teams -->
+            <div>
+              <p class="form-section-label">Teams</p>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="form-label">Batting</label>
+                  <select class="form-ctrl" id="batting_team">
+                    <option selected>Mumbai Indians</option>
+                    <option>Chennai Super Kings</option>
+                    <option>Royal Challengers Bengaluru</option>
+                    <option>Kolkata Knight Riders</option>
+                    <option>Rajasthan Royals</option>
+                    <option>Sunrisers Hyderabad</option>
+                    <option>Delhi Capitals</option>
+                    <option>Punjab Kings</option>
+                    <option>Gujarat Titans</option>
+                    <option>Lucknow Super Giants</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label">Bowling</label>
+                  <select class="form-ctrl" id="bowling_team">
+                    <option>Mumbai Indians</option>
+                    <option selected>Chennai Super Kings</option>
+                    <option>Royal Challengers Bengaluru</option>
+                    <option>Kolkata Knight Riders</option>
+                    <option>Rajasthan Royals</option>
+                    <option>Sunrisers Hyderabad</option>
+                    <option>Delhi Capitals</option>
+                    <option>Punjab Kings</option>
+                    <option>Gujarat Titans</option>
+                    <option>Lucknow Super Giants</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Players -->
+            <div>
+              <p class="form-section-label">At the Crease</p>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="form-label">On Strike</label>
+                  <input type="text" class="form-ctrl" id="striker" value="Tim David" />
+                </div>
+                <div>
+                  <label class="form-label">Non-Striker</label>
+                  <input type="text" class="form-ctrl" id="non_striker" value="Hardik Pandya" />
+                </div>
+              </div>
+              <div class="mt-2">
+                <label class="form-label">Striker Handedness</label>
+                <select class="form-ctrl" id="striker_handedness">
+                  <option value="Right-handed" selected>Right-handed</option>
+                  <option value="Left-handed">Left-handed</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Bowlers -->
+            <div>
+              <p class="form-section-label">Bowlers Available</p>
+              <div id="bowler-list" class="space-y-2">
+                <div class="bowler-row grid grid-cols-[1fr_60px_32px] gap-2 items-center">
+                  <input type="text" class="form-ctrl bowler-name" placeholder="Bowler" value="Deepak Chahar" />
+                  <input type="number" class="form-ctrl bowler-overs text-center" value="1" min="1" max="4" />
+                  <button type="button" onclick="removeBowlerRow(this)" class="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center justify-center">✕</button>
+                </div>
+                <div class="bowler-row grid grid-cols-[1fr_60px_32px] gap-2 items-center">
+                  <input type="text" class="form-ctrl bowler-name" placeholder="Bowler" value="Yuzvendra Chahal" />
+                  <input type="number" class="form-ctrl bowler-overs text-center" value="2" min="1" max="4" />
+                  <button type="button" onclick="removeBowlerRow(this)" class="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center justify-center">✕</button>
+                </div>
+                <div class="bowler-row grid grid-cols-[1fr_60px_32px] gap-2 items-center">
+                  <input type="text" class="form-ctrl bowler-name" placeholder="Bowler" value="Tushar Deshpande" />
+                  <input type="number" class="form-ctrl bowler-overs text-center" value="2" min="1" max="4" />
+                  <button type="button" onclick="removeBowlerRow(this)" class="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center justify-center">✕</button>
+                </div>
+              </div>
+              <button type="button" onclick="addBowlerRow()" class="mt-2 w-full py-2 rounded-xl border border-dashed border-teal/30 text-teal text-xs font-semibold hover:bg-teal/5 transition-colors">+ Add Bowler</button>
+            </div>
+
+            <!-- Conditions -->
+            <div>
+              <p class="form-section-label">Ground Conditions</p>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="form-label">Venue</label>
+                  <select class="form-ctrl" id="venue">
+                    <option value="Wankhede Stadium, Mumbai" selected>Wankhede, Mumbai</option>
+                    <option value="MA Chidambaram Stadium, Chennai">Chepauk, Chennai</option>
+                    <option value="Eden Gardens, Kolkata">Eden Gardens, Kolkata</option>
+                    <option value="Arun Jaitley Stadium, Delhi">Arun Jaitley, Delhi</option>
+                    <option value="M. Chinnaswamy Stadium, Bengaluru">Chinnaswamy, Bengaluru</option>
+                    <option value="Narendra Modi Stadium, Ahmedabad">NM Stadium, Ahmedabad</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label">Pitch</label>
+                  <select class="form-ctrl" id="pitch_type">
+                    <option value="Flat" selected>Flat</option>
+                    <option value="Turning">Turning</option>
+                    <option value="Two-paced">Two-paced</option>
+                    <option value="Seaming">Seaming</option>
+                  </select>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2 mt-2">
+                <div>
+                  <label class="form-label">Phase</label>
+                  <select class="form-ctrl" id="phase">
+                    <option>Powerplay (1-6)</option>
+                    <option>Middle overs (7-14)</option>
+                    <option value="Death overs (15-20)" selected>Death overs (15-20)</option>
+                  </select>
+                </div>
+                <div class="flex flex-col gap-2 pt-1">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <div class="toggle-wrap">
+                      <input type="checkbox" id="dew_factor" class="sr-only peer" checked />
+                      <div class="toggle-track peer-checked:bg-orange peer-checked:border-orange"></div>
+                    </div>
+                    <span class="text-xs text-white/60">Dew</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <div class="toggle-wrap">
+                      <input type="checkbox" id="impact_player" class="sr-only peer" checked />
+                      <div class="toggle-track peer-checked:bg-orange peer-checked:border-orange"></div>
+                    </div>
+                    <span class="text-xs text-white/60">Impact Player</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" id="submit-btn" class="w-full py-4 rounded-xl bg-orange-grad font-bold text-base tracking-wide shadow-lg shadow-orange/30 hover:shadow-orange/50 active:scale-95 transition-all flex items-center justify-center gap-2">
+              <span id="submit-icon">🏏</span>
+              <span id="submit-text">Ask the Captain</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- How it works -->
+        <div class="mt-6">
+          <p class="text-xs font-semibold uppercase tracking-widest text-white/30 mb-3 text-center">How the Debate Works</p>
+          <div class="space-y-2">
+            <div class="how-step"><span class="how-num">01</span><span class="how-emoji">📊</span><div><p class="text-sm font-semibold">Stats Analyst</p><p class="text-xs text-white/40">Live weather API + player stats via Gemini function calling</p></div></div>
+            <div class="how-step"><span class="how-num">02</span><span class="how-emoji">🧠</span><div><p class="text-sm font-semibold">Strategist</p><p class="text-xs text-white/40">Proposes tactical call in your captain's style</p></div></div>
+            <div class="how-step"><span class="how-num">03</span><span class="how-emoji">😈</span><div><p class="text-sm font-semibold">Devil's Advocate</p><p class="text-xs text-white/40">Tears the strategy apart — finds every flaw</p></div></div>
+            <div class="how-step"><span class="how-num">04</span><span class="how-emoji">🧠</span><div><p class="text-sm font-semibold">Strategist Revises</p><p class="text-xs text-white/40">Defends or revises based on the challenge</p></div></div>
+            <div class="how-step"><span class="how-num">05</span><span class="how-emoji">🎙️</span><div><p class="text-sm font-semibold">Commentator</p><p class="text-xs text-white/40">Final verdict in pure cricket language + confidence %</p></div></div>
+          </div>
+        </div>
+
+        <p class="text-center text-[10px] text-white/20 mt-6">Built on Google Gemini 2.5 Flash · APL GDG Pune 2025</p>
+      </section>
+    </div>
+
+    <!-- ════ SCREEN 2: WAR ROOM ════ -->
+    <div id="screen-warroom" class="hidden">
+
+      <!-- Header -->
+      <header class="sticky top-0 z-50 bg-obsidian/90 backdrop-blur-xl border-b border-border px-4 h-14 flex items-center gap-3">
+        <button onclick="goToCommandCenter()" class="w-8 h-8 rounded-lg bg-surface border border-border flex items-center justify-center text-sm hover:border-orange/40 transition-colors">←</button>
+        <div class="flex-1">
+          <p class="text-sm font-bold leading-none">War Room</p>
+          <p class="text-[10px] text-white/40">Agent Debate in Progress</p>
+        </div>
+        <div id="warroom-status" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface border border-border text-xs text-white/50">
+          <span class="w-1.5 h-1.5 rounded-full bg-orange animate-pulse"></span>
+          <span id="status-text">Starting...</span>
+        </div>
+      </header>
+
+      <!-- Match Context Bar -->
+      <div id="match-context-bar" class="px-4 py-3 bg-surface border-b border-border">
+        <div class="flex items-center justify-between text-xs">
+          <span id="ctx-teams" class="font-semibold text-white/80"></span>
+          <span id="ctx-score" class="font-bold text-orange"></span>
+          <span id="ctx-situation" class="text-white/40"></span>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="px-4 py-3 border-b border-border">
+        <div class="h-1 bg-surface2 rounded-full overflow-hidden mb-3">
+          <div id="progress-fill" class="h-full bg-orange-grad rounded-full transition-all duration-700" style="width:0%"></div>
+        </div>
+        <div class="flex justify-between">
+          <div class="progress-step" id="step-1"><div class="step-dot" id="dot-1">📊</div><div class="step-lbl">Stats</div></div>
+          <div class="progress-step" id="step-2"><div class="step-dot" id="dot-2">🧠</div><div class="step-lbl">Strategy</div></div>
+          <div class="progress-step" id="step-3"><div class="step-dot" id="dot-3">😈</div><div class="step-lbl">Challenge</div></div>
+          <div class="progress-step" id="step-4"><div class="step-dot" id="dot-4">🧠</div><div class="step-lbl">Revise</div></div>
+          <div class="progress-step" id="step-5"><div class="step-dot" id="dot-5">🎙️</div><div class="step-lbl">Verdict</div></div>
+        </div>
+      </div>
+
+      <!-- Debate Feed -->
+      <div id="debate-transcript" class="px-4 py-4 space-y-4 pb-24 overflow-y-auto">
+        <!-- Agent messages injected here -->
+      </div>
+
+      <!-- Error State -->
+      <div id="error-state" class="hidden px-4 py-8 text-center">
+        <div class="text-4xl mb-3">⚠️</div>
+        <p id="error-message" class="text-sm text-white/50 mb-4"></p>
+        <button onclick="goToCommandCenter()" class="px-6 py-2 rounded-xl bg-surface border border-border text-sm">← Try Again</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

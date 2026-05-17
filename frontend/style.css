@@ -1,0 +1,105 @@
+/* Captain Cool — Custom CSS (Tailwind overrides + custom components) */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap');
+
+* { box-sizing: border-box; }
+html, body { font-family: 'Sora', sans-serif; }
+
+/* Screens */
+.screen-active { display: block; }
+
+/* Captain Buttons */
+.captain-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 10px 8px; border-radius: 12px;
+  background: #1c1c1c; border: 1px solid #2e2e2e;
+  cursor: pointer; color: white; transition: all 0.2s;
+  width: 100%;
+}
+.captain-btn:hover { border-color: rgba(255,138,0,0.4); }
+.active-captain { border-color: #ff8a00 !important; background: rgba(255,138,0,0.1) !important; box-shadow: 0 0 20px rgba(255,138,0,0.15); }
+
+/* Form elements */
+.form-section-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.35); margin-bottom: 8px; }
+.form-label { display: block; font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.45); margin-bottom: 4px; }
+.form-ctrl {
+  width: 100%; background: #242424; border: 1px solid #2e2e2e;
+  border-radius: 10px; padding: 8px 10px; color: white;
+  font-family: 'Sora', sans-serif; font-size: 13px;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-ctrl:focus { border-color: #ff8a00; box-shadow: 0 0 0 3px rgba(255,138,0,0.12); }
+.form-ctrl option { background: #1c1c1c; }
+
+/* Toggle */
+.toggle-wrap { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+.toggle-track {
+  position: absolute; inset: 0; border-radius: 10px;
+  background: #2e2e2e; border: 1px solid #3e3e3e; transition: all 0.3s;
+}
+.toggle-track::after {
+  content: ''; position: absolute; width: 14px; height: 14px;
+  border-radius: 50%; background: white; top: 2px; left: 2px; transition: transform 0.3s;
+}
+input[type="checkbox"]:checked ~ .toggle-track { background: #ff8a00; border-color: #ff8a00; }
+input[type="checkbox"]:checked ~ .toggle-track::after { transform: translateX(16px); }
+
+/* How steps */
+.how-step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px; background: #1c1c1c; border: 1px solid #2e2e2e; border-radius: 12px; }
+.how-num { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.2); letter-spacing: 0.05em; min-width: 16px; padding-top: 2px; }
+.how-emoji { font-size: 1.1rem; flex-shrink: 0; }
+
+/* Progress steps */
+.progress-step { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.step-dot { font-size: 1rem; opacity: 0.25; transition: opacity 0.3s, transform 0.3s; }
+.step-dot.active { opacity: 1; transform: scale(1.25); }
+.step-dot.done { opacity: 0.55; }
+.step-lbl { font-size: 9px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* Agent message cards */
+.agent-card { border-radius: 14px; border: 1px solid #2e2e2e; overflow: hidden; animation: slideUp 0.35s ease; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+.agent-card-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid #2e2e2e; }
+.agent-card-emoji { font-size: 1.1rem; }
+.agent-card-name { font-weight: 700; font-size: 13px; }
+.agent-card-label { margin-left: auto; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 6px; }
+.agent-card-body { padding: 12px 14px; font-size: 13px; line-height: 1.8; color: rgba(255,255,255,0.85); white-space: pre-wrap; word-wrap: break-word; }
+
+/* Per-agent colors */
+.card-stats .agent-card-header { background: rgba(0,212,170,0.05); }
+.card-stats .agent-card-name { color: #00d4aa; }
+.card-stats .agent-card-label { background: rgba(0,212,170,0.1); color: #00d4aa; }
+
+.card-strategist .agent-card-header { background: rgba(255,138,0,0.05); }
+.card-strategist .agent-card-name { color: #ffad4d; }
+.card-strategist .agent-card-label { background: rgba(255,138,0,0.1); color: #ff8a00; }
+
+.card-devil .agent-card-header { background: rgba(139,92,246,0.05); }
+.card-devil .agent-card-name { color: #a78bfa; }
+.card-devil .agent-card-label { background: rgba(139,92,246,0.1); color: #a78bfa; }
+
+.card-commentator .agent-card-header { background: rgba(255,215,0,0.05); }
+.card-commentator .agent-card-name { color: #ffd700; }
+.card-commentator .agent-card-label { background: rgba(255,215,0,0.1); color: #ffd700; }
+
+/* Tool badges */
+.tool-calls-row { display: flex; flex-wrap: wrap; gap: 5px; padding: 8px 14px; border-top: 1px solid #2e2e2e; background: rgba(0,0,0,0.25); }
+.tool-badge { font-size: 10px; font-family: 'Courier New', monospace; padding: 2px 7px; border-radius: 5px; background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.2); color: #00d4aa; }
+
+/* Typing indicator */
+.typing-card { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: #1c1c1c; border: 1px solid #2e2e2e; border-radius: 14px; animation: slideUp 0.3s ease; }
+.typing-dots { display: flex; gap: 4px; }
+.typing-dots span { width: 6px; height: 6px; border-radius: 50%; background: #ff8a00; animation: dotBounce 1.2s infinite; }
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotBounce { 0%,80%,100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+
+/* Final banner */
+.final-banner { text-align: center; padding: 16px; background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 14px; margin-top: 8px; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: rgba(255,138,0,0.3); border-radius: 2px; }
+
+/* API key warning */
+.api-warn { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 12px; padding: 12px 16px; font-size: 12px; color: #fca5a5; margin: 0 16px 16px; }
